@@ -33,9 +33,9 @@ public class MyConnection {
                 credentials.put(data[0], data[1]);
             }
             System.out.println("Credentials:" + credentials);
-            URL = credentials.get("URL");
-            USER = credentials.get("USER");
-            PASSWORD = credentials.get("PASSWORD");
+            URL = credentials.get("URL_KEY");
+            USER = credentials.get("USER_KEY");
+            PASSWORD = credentials.get("PASSWORD_KEY");
         } catch (Exception e) {
             e.printStackTrace();
         }

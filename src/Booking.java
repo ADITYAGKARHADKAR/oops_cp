@@ -12,13 +12,6 @@ public class Booking {
        Operations c=new Operations();
        c.cacheRoute(connection,"Routes");
        c.cacheRoute(connection,"flightdetails");
-       System.out.println(Operations.fd.isEmpty());
-       for(FlightDetails x: Operations.fd){
-           System.out.println(x.getAirlineCode()+" "+x.getAirlineName()+" "+x.getPrice()+" "+x.getDiscount()+" "+x.getAirRouteId());
-       }
-
-
-
-        SwingUtilities.invokeLater(() -> new EnhancedBookingForm(connection.get()).setVisible(true));
+      SwingUtilities.invokeLater(() -> new EnhancedBookingForm(connection.get()).setVisible(true));
     }
 }

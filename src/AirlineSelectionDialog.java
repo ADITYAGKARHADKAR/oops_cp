@@ -44,12 +44,12 @@ public class AirlineSelectionDialog extends JDialog {
 
         ButtonGroup group = new ButtonGroup();
 
-        // 🔥 JOIN LOGIC (Correct)
+
         for (Route route : routes) {
 
             for (FlightDetails fd : flights) {
 
-                // ✅ Correct join using routeId
+
                 if (route.getRouteId() == fd.getRouteId()) {
 
                     JPanel rowPanel = new JPanel(new GridLayout(1, 11, 10, 5));

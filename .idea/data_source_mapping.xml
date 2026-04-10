@@ -1,0 +1,8 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<project version="4">
+  <component name="DataSourcePerFileMappings">
+    <file url="file://$APPLICATION_CONFIG_DIR$/consoles/db/0727b891-f984-43f6-a872-9181760b4497/console_1.sql" value="0727b891-f984-43f6-a872-9181760b4497" />
+    <file url="file://$PROJECT_DIR$/DB_Scripts/airline_routes.sql" value="0727b891-f984-43f6-a872-9181760b4497" />
+    <file url="file://$PROJECT_DIR$/DB_Scripts/route.sql" value="0727b891-f984-43f6-a872-9181760b4497" />
+  </component>
+</project>

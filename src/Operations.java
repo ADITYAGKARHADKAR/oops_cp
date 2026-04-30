@@ -35,6 +35,7 @@ public class Operations implements ServerStart{
             pstmt.setInt(3,age);
             pstmt.setString(4,pnr);
             rows=pstmt.executeUpdate();
+            System.out.println("rows="+rows);
             return rows;
 
         } catch (java.sql.SQLException e){

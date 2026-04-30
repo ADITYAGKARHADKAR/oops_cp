@@ -16,6 +16,16 @@ public class TicketManagementForm extends JDialog {
 
     private JButton updateBtn, deleteBtn, cancelBtn;
 
+    private final Color DARK_BLACK = Color.BLACK;
+
+    // ===== Styled Label =====
+    private JLabel createStyledLabel(String text) {
+        JLabel label = new JLabel(text);
+        label.setForeground(DARK_BLACK);
+        label.setFont(new Font("Arial", Font.BOLD, 14));
+        return label;
+    }
+
     private void clearForm() {
         nameField.setText("");
         passportField.setText("");
@@ -35,22 +45,28 @@ public class TicketManagementForm extends JDialog {
     }
 
     public TicketManagementForm(JFrame parent, Connection con) {
-        super(parent, "Ticket Management", true); // Modal dialog
+        super(parent, "Ticket Management", true);
         this.connection = con;
 
-        // ===== Maximized dialog =====
-        Dimension screenSize = Toolkit.getDefaultToolkit().getScreenSize();
-        setSize(screenSize.width, screenSize.height);
-        setLocation(0, 0);
+        setSize(1200, 750);
+        setLocationRelativeTo(parent);
         setDefaultCloseOperation(JDialog.DISPOSE_ON_CLOSE);
 
+        // ===== Background Image =====
+        ImageIcon bgIcon = new ImageIcon(getClass().getResource("/image/airport.png"));
+        JLabel background = new JLabel(bgIcon);
+        background.setLayout(new BorderLayout());
+        setContentPane(background);
+
         JPanel panel = new JPanel(new GridBagLayout());
+        panel.setOpaque(false);
+
         GridBagConstraints gbc = new GridBagConstraints();
-        gbc.insets = new Insets(5, 5, 5, 5);
+        gbc.insets = new Insets(8, 8, 8, 8);
         gbc.fill = GridBagConstraints.HORIZONTAL;
 
-        // ===== Row 1: PNR search =====
-        JLabel pnrLabel = new JLabel("Enter PNR:");
+        // ===== Row 1: PNR =====
+        JLabel pnrLabel = createStyledLabel("Enter PNR:");
         pnrField = new JTextField(15);
         searchBtn = new JButton("Search");
 
@@ -58,18 +74,20 @@ public class TicketManagementForm extends JDialog {
         gbc.gridx = 1; panel.add(pnrField, gbc);
         gbc.gridx = 2; panel.add(searchBtn, gbc);
 
-        // ===== Row 2+: Ticket details =====
-        String[] labels = {"Passenger Name", "Passport Number", "Age", "Travel Date",
+        // ===== Ticket Fields =====
+        String[] labels = {
+                "Passenger Name", "Passport Number", "Age", "Travel Date",
                 "Airline Code", "Airline Name", "Departure", "Arrival",
-                "Price", "Discount", "Fare", "PNR"};
+                "Price", "Discount", "Fare", "PNR"
+        };
 
         JTextField[] fields = new JTextField[labels.length];
 
         for (int i = 0; i < labels.length; i++) {
-            JLabel label = new JLabel(labels[i] + ":");
+
+            JLabel label = createStyledLabel(labels[i] + ":");
             JTextField field = new JTextField(15);
 
-            // Make fields read-only except Passenger Name, Passport Number, Age
             if (!labels[i].equals("Passenger Name") &&
                     !labels[i].equals("Passport Number") &&
                     !labels[i].equals("Age")) {
@@ -81,6 +99,7 @@ public class TicketManagementForm extends JDialog {
             gbc.gridx = (i % 4) * 2;
             gbc.gridy = 1 + i / 4;
             panel.add(label, gbc);
+
             gbc.gridx = (i % 4) * 2 + 1;
             panel.add(field, gbc);
         }
@@ -98,16 +117,17 @@ public class TicketManagementForm extends JDialog {
         fareField = fields[10];
         pnrDisplayField = fields[11];
 
-        // ===== Row after details: Update/Delete/Cancel buttons =====
+        // ===== Buttons =====
         updateBtn = new JButton("Update");
         deleteBtn = new JButton("Delete");
         cancelBtn = new JButton("Cancel");
 
-        // Disable Update/Delete initially
         updateBtn.setEnabled(false);
         deleteBtn.setEnabled(false);
 
         JPanel buttonPanel = new JPanel();
+        buttonPanel.setOpaque(false);
+
         buttonPanel.add(updateBtn);
         buttonPanel.add(deleteBtn);
         buttonPanel.add(cancelBtn);
@@ -117,9 +137,9 @@ public class TicketManagementForm extends JDialog {
         gbc.gridwidth = 8;
         panel.add(buttonPanel, gbc);
 
-        add(panel);
+        background.add(panel, BorderLayout.CENTER);
 
-        // ===== Button actions =====
+        // ===== Actions =====
         searchBtn.addActionListener(e -> {
             String pnrInput = pnrField.getText().trim();
 
@@ -132,7 +152,6 @@ public class TicketManagementForm extends JDialog {
                 ResultSet rs = Operations.searchTicket(connection, pnrInput);
 
                 if (rs != null && rs.next()) {
-                    // Populate fields
                     nameField.setText(rs.getString("PassengerName"));
                     passportField.setText(rs.getString("PassportNumber"));
                     ageField.setText(String.valueOf(rs.getInt("age")));
@@ -146,77 +165,68 @@ public class TicketManagementForm extends JDialog {
                     fareField.setText(String.valueOf(rs.getDouble("fare")));
                     pnrDisplayField.setText(rs.getString("pnr"));
 
-                    // Enable Update/Delete after successful search
                     updateBtn.setEnabled(true);
                     deleteBtn.setEnabled(true);
 
                 } else {
-                    JOptionPane.showMessageDialog(this, "Ticket not found for PNR: " + pnrInput);
+                    JOptionPane.showMessageDialog(this, "Ticket not found!");
                     clearForm();
                 }
 
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error retrieving ticket: " + ex.getMessage());
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
                 clearForm();
             }
         });
 
         updateBtn.addActionListener(e -> {
             try {
-                // Get values from text fields
-                String pnr = pnrField.getText();
+                String pnr = pnrField.getText().trim();
                 String name = nameField.getText();
                 String passport = passportField.getText();
                 int age = Integer.parseInt(ageField.getText());
 
-                // Call your updateTicket method
                 int rowsUpdated = Operations.updateTicket(connection, pnr, name, passport, age);
 
-                // Show success/failure message
                 if (rowsUpdated > 0) {
-                    JOptionPane.showMessageDialog(this, "Ticket updated successfully!");
+                    JOptionPane.showMessageDialog(this, "Updated successfully!");
                     clearForm();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Error updating given PNR.");
+                    JOptionPane.showMessageDialog(this, "Update failed!");
                 }
 
-            } catch (NumberFormatException nfe) {
-                JOptionPane.showMessageDialog(this, "Invalid age. Please enter a number.");
             } catch (Exception ex) {
-                ex.printStackTrace();
-                JOptionPane.showMessageDialog(this, "Error updating ticket: " + ex.getMessage());
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         });
+
         deleteBtn.addActionListener(e -> {
             String pnrInput = pnrField.getText().trim();
+
             int confirm = JOptionPane.showConfirmDialog(
                     this,
-                    "Are you sure you want to delete the ticket with PNR: " + pnrInput + "?",
-                    "Confirm Deletion",
+                    "Delete ticket with PNR: " + pnrInput + "?",
+                    "Confirm",
                     JOptionPane.YES_NO_OPTION
             );
 
-            if (confirm != JOptionPane.YES_OPTION) {
-                return; // user cancelled
-            }
+            if (confirm != JOptionPane.YES_OPTION) return;
 
             try {
                 int rowsDeleted = Operations.deleteTicket(connection, pnrInput);
 
                 if (rowsDeleted > 0) {
-                    JOptionPane.showMessageDialog(this, "Ticket deleted successfully!");
+                    JOptionPane.showMessageDialog(this, "Deleted successfully!");
                     clearForm();
                 } else {
-                    JOptionPane.showMessageDialog(this, "Ticket not found or deletion failed.");
+                    JOptionPane.showMessageDialog(this, "Delete failed!");
                 }
 
             } catch (Exception ex) {
-                JOptionPane.showMessageDialog(this, "Error deleting ticket: " + ex.getMessage());
-                ex.printStackTrace();
+                JOptionPane.showMessageDialog(this, "Error: " + ex.getMessage());
             }
         });
 
-        cancelBtn.addActionListener(e -> this.dispose()); // Close dialog
+        cancelBtn.addActionListener(e -> dispose());
     }
 }
